@@ -112,11 +112,9 @@ Now that we have an environment, we need an application to connect to it. If you
 
 You will need a suitable Java development environment including:
 
-- Java 11
+- Java 17
 - Maven
 - An IDE such as IntelliJ, Eclipse, or VS Code.
-
-**NOTE:** You must use Java 11 when working on these exercises. Flink supports both Java 8 and 11, however, the exercises use features only available in Java 11.
 
 To easily switch between Java versions, you can use [SDKMAN](https://sdkman.io/).
 
