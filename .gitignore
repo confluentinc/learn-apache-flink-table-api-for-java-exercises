@@ -31,6 +31,7 @@ producer.properties
 exercises/*
 !exercises/exercise.sh
 !exercises/exercise.bat
+!exercises/README.md
 
 /flink*
 
