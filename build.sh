@@ -24,7 +24,8 @@ function validate() {
 
     cp -r $EXERCISES_DIR $TMP_DIR
     cp -r $SOLUTIONS_DIR $TMP_DIR
-    cp -r $STAGING_DIR $TMP_DIR 
+    cp -r $STAGING_DIR $TMP_DIR
+    cp $EXERCISES_DIR/src/main/resources/cloud.properties $TMP_DIR/$EXERCISES_DIR/cloud.properties
 
     cd $TMP_DIR/$EXERCISES_DIR
 
@@ -35,6 +36,8 @@ function validate() {
         ./exercise.sh stage $EXERCISE
         ./exercise.sh solve $EXERCISE
         echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+        cp cloud.properties src/main/resources/cloud.properties
 
         if [ -f "pom.xml" ]; then
             mvn clean test

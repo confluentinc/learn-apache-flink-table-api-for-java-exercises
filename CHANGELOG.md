@@ -7,3 +7,7 @@
 ## Version 0.2.0
 
 * Initial implementation for Exercise 03 - Connecting to Confluent Cloud.
+
+## Version 0.3.0
+
+* Initial implementation for Exercise 07 - Querying Flink Tables
