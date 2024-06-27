@@ -32,10 +32,13 @@ public abstract class FlinkTableAPITest {
 
     @AfterEach
     public void mainTeardown() {
-        cleanupList.forEach(tableResult -> {
-            JobClient client = tableResult.getJobClient().orElseThrow();
-            client.cancel().thenRun(() -> System.out.println("Job Canceled During Cleanup"));
-        });
+        cleanupList.forEach(tableResult ->
+            tableResult.getJobClient().ifPresent(client ->
+                client.cancel().thenRun(() ->
+                    System.out.println("Job Canceled During Cleanup")
+                )
+            )
+        );
 
         teardown();
     }
