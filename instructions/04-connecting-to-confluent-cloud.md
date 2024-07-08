@@ -112,7 +112,7 @@ Now that we have an environment, we need an application to connect to it. If you
 
 You will need a suitable Java development environment including:
 
-- Java 17
+- Java 21
 - Maven
 - An IDE such as IntelliJ, Eclipse, or VS Code.
 
