@@ -24,13 +24,12 @@
 target
 
 # Properties files (may contain user credentials)
-consumer.properties
-producer.properties
+cloud.properties
 
 # Exercises folder
 exercises/*
 !exercises/exercise.sh
-!exercises/exercise.bat
+!exercises/README.md
 
 /flink*
 
