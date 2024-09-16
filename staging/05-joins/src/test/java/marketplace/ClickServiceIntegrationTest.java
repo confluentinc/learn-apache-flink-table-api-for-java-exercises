@@ -81,7 +81,7 @@ class ClickServiceIntegrationTest extends FlinkIntegrationTest {
         TableResult result = clickService.createOrderPlacedAfterClickTable();
 
         String status = result.collect().next().getFieldAs(0);
-        assertEquals("Table '"+orderPlacedAfterClickShortTableName+"' created", status);
+        assertEquals("Command completed successfully.", status);
 
         env.useCatalog("flink-table-api-java");
         env.useDatabase("marketplace");

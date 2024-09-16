@@ -30,7 +30,7 @@ under the License.
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <flink.version>1.20.0</flink.version>
-        <confluent-plugin.version>0.129.0</confluent-plugin.version>
+        <confluent-plugin.version>1.20-42</confluent-plugin.version>
         <kafka-clients.version>3.8.0</kafka-clients.version>
         <schema-registry-client.version>7.7.0</schema-registry-client.version>
         <target.java.version>21</target.java.version>
