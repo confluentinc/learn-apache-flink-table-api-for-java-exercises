@@ -3,6 +3,7 @@ package marketplace;
 import org.apache.flink.table.api.*;
 import org.apache.flink.table.expressions.Expression;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -16,6 +17,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verify;
 
+@Tag("UnitTest")
 class ClickServiceTest {
     private ClickService service;
     private TableEnvironment mockEnv;
