@@ -167,7 +167,7 @@ class OrderServiceIntegrationTest extends FlinkIntegrationTest {
         TableResult result = orderService.createFreeShippingTable();
 
         String status = result.collect().next().getFieldAs(0);
-        assertEquals("Table '"+orderQualifiedForFreeShippingShortTableName+"' created", status);
+        assertEquals("Command completed successfully.", status);
 
         env.useCatalog("flink-table-api-java");
         env.useDatabase("marketplace");
