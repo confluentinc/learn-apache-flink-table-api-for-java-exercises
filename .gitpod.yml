@@ -1,0 +1,12 @@
+image: gitpod/workspace-java-21
+
+tasks:
+  - name: exercises
+    command: |
+      cd exercises
+
+vscode:
+  extensions:
+    - vscjava.vscode-java-pack
+
+workspaceLocation: /workspace/learn-apache-flink-table-api-for-java-exercises

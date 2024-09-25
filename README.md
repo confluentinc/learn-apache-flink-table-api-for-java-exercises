@@ -58,3 +58,7 @@ In general, you can ignore this folder.
 The `solutions` folder contains complete solutions for each exercise. These will be copied to the `exercises` folder when you execute the `solve` command with the `exercise.sh` script.
 
 In general, you can ignore this folder, but you might find it helpful to reference if you get stuck.
+
+## Gitpod
+
+This repository contains a [Gitpod](https://www.gitpod.io/) configuration file. You can use Gitpod to spin up a browser-based development environment for working on these exercises.
