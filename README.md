@@ -62,3 +62,5 @@ In general, you can ignore this folder, but you might find it helpful to referen
 ## Gitpod
 
 This repository contains a [Gitpod](https://www.gitpod.io/) configuration file. You can use Gitpod to spin up a browser-based development environment for working on these exercises.
+
+[Open In Gitpod](https://gitpod.io/new/#https://github.com/confluentinc/learn-apache-flink-table-api-for-java-exercises)
