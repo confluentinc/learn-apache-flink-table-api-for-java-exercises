@@ -1,0 +1,38 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/java:21",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "confluentinc.vscode-confluent"
+      ]
+    }
+  },
+
+  "features": {
+     "ghcr.io/devcontainers/features/java:1": {
+        "version": "none",
+        "installMaven": "true"
+    }
+  },
+
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+  "workspaceFolder": "/workspace/exercises",
+
+  "remoteEnv": {
+    "JAVA_HOME": "/usr/lib/jvm/msopenjdk-current"
+  },
+
+  "mounts": [
+    {
+      "source": "${localWorkspaceFolder}/solutions",
+      "target": "/workspace/exercises/solutions",
+      "type": "bind"
+    },
+    {
+      "source": "${localWorkspaceFolder}/README.md",
+      "target": "/workspace/exercises/README.md",
+      "type": "bind"
+    }
+  ]
+}
