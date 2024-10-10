@@ -29,7 +29,6 @@ cloud.properties
 # Exercises folder
 exercises/*
 !exercises/exercise.sh
-!exercises/README.md
 
 /flink*
 
