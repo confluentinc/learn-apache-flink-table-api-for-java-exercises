@@ -1,6 +1,6 @@
 # Apache Flink Table API for Java
 
-This repository is for the **Apache Flink Table API for Java** course provided by Confluent Developer.
+This repository is for the [** Apache Flink® Table API: Processing Data Streams in Java**](https://developer.confluent.io/courses/flink-table-api-java/) course provided by Confluent Developer.
 
 ## A Simple Marketplace with Apache Flink
 
@@ -58,3 +58,9 @@ In general, you can ignore this folder.
 The `solutions` folder contains complete solutions for each exercise. These will be copied to the `exercises` folder when you execute the `solve` command with the `exercise.sh` script.
 
 In general, you can ignore this folder, but you might find it helpful to reference if you get stuck.
+
+## Gitpod
+
+This repository contains a [Gitpod](https://www.gitpod.io/) configuration file. You can use Gitpod to spin up a browser-based development environment for working on these exercises.
+
+[Open In Gitpod](https://gitpod.io/new/#https://github.com/confluentinc/learn-apache-flink-table-api-for-java-exercises)

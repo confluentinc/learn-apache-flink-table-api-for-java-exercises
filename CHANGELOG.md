@@ -15,3 +15,7 @@
 ## Version 0.3.1
 
 * Fixing an issue with the POM file that was preventing VS Code from detecting the main method.
+
+## Version 0.3.2
+
+* Added a basic Gitpod configuration file.

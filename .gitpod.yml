@@ -1,0 +1,13 @@
+image: gitpod/workspace-java-21
+
+tasks:
+  - command: gp open /workspace/learn-apache-flink-table-api-for-java-exercises/README.md && exit
+  - name: exercises
+    command: |
+      cd exercises
+
+vscode:
+  extensions:
+    - vscjava.vscode-java-pack
+
+workspaceLocation: /workspace/learn-apache-flink-table-api-for-java-exercises
