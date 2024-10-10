@@ -59,6 +59,18 @@ The `solutions` folder contains complete solutions for each exercise. These will
 
 In general, you can ignore this folder, but you might find it helpful to reference if you get stuck.
 
+## Development Container
+
+This repo contains a [.devcontainer.json](.devcontainer.json) file.
+
+If you are using a Development Container compatible IDE (Eg. VS Code), you may open the root folder with your IDE. This should automatically configure your development environment with all the required settings.
+
+See here for more details:
+
+- [Development Containers](https://containers.dev/)
+- [Development Containers in VS Code](https://code.visualstudio.com/docs/devcontainers/containers)
+- [Development Containers in IntelliJ](https://www.jetbrains.com/help/idea/connect-to-devcontainer.html)
+
 ## Gitpod
 
 This repository contains a [Gitpod](https://www.gitpod.io/) configuration file. You can use Gitpod to spin up a browser-based development environment for working on these exercises.
