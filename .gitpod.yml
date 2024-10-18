@@ -1,6 +1,7 @@
 image: gitpod/workspace-java-21
 
 tasks:
+  - init: sudo curl -L --http1.1 https://cnfl.io/cli | sudo sh -s -- -b /usr/local/bin
   - command: gp open /workspace/learn-apache-flink-table-api-for-java-exercises/README.md && exit
   - name: exercises
     command: |

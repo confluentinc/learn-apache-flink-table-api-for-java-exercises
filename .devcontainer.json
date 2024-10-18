@@ -3,6 +3,7 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        "redhat.java",
         "vscjava.vscode-java-pack",
         "confluentinc.vscode-confluent"
       ]
@@ -34,5 +35,7 @@
       "target": "/workspace/exercises/README.md",
       "type": "bind"
     }
-  ]
+  ],
+
+  "onCreateCommand": "sudo curl -L --http1.1 https://cnfl.io/cli | sudo sh -s -- -b /usr/local/bin"
 }

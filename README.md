@@ -77,8 +77,12 @@ See here for more details:
 - [Development Containers in VS Code](https://code.visualstudio.com/docs/devcontainers/containers)
 - [Development Containers in IntelliJ](https://www.jetbrains.com/help/idea/connect-to-devcontainer.html)
 
+If you are working in the Development Container and intend to use the Confluent CLI, you will need to login to the CLI using the [--no-browser](https://docs.confluent.io/confluent-cli/current/command-reference/confluent_login.html) flag.
+
 ## Gitpod
 
 This repository contains a [Gitpod](https://www.gitpod.io/) configuration file. You can use Gitpod to spin up a browser-based development environment for working on these exercises.
 
 [Open In Gitpod](https://gitpod.io/new/#https://github.com/confluentinc/learn-apache-flink-table-api-for-java-exercises)
+
+If you are working in Gitpod and intend to use the Confluent CLI, you will need to login to the CLI using the [--no-browser](https://docs.confluent.io/confluent-cli/current/command-reference/confluent_login.html) flag.
