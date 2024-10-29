@@ -63,7 +63,7 @@ In general, you can ignore this folder, but you might find it helpful to referen
 
 This repo contains a [.devcontainer.json](.devcontainer.json) file.
 
-If you are using a Development Container compatible IDE (Eg. VS Code, IntelliJ Ultimate) and have Docker running, you can use the `.devcontainer.json` file to automatically configure your development environment with the required settings. This includes automatically setting up the correct version of the JVM, installing Maven, and potentially configuring your IDE with any required plugins. It will give you a fully functional development environment in moments.
+If you are using a Development Container compatible IDE (Eg. VS Code, IntelliJ Ultimate) and have Docker running, you can use the `.devcontainer.json` file to automatically configure your development environment with the required settings. This includes automatically setting up the correct version of the JVM, installing Maven, installing the Confluent CLI, and potentially configuring your IDE with any required plugins. It will give you a fully functional development environment in moments.
 Depending on what IDE you are using, the process can vary.
 
 In VS Code, open the folder that contains the `.devcontainer.json` file. When prompted, re-open it in the container. Please note that you may need to install the Dev Containers plugin for VS Code prior to opening.
