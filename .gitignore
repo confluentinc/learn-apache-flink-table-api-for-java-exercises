@@ -20,6 +20,9 @@
 *.iml
 .idea
 
+# VSCode
+.vscode
+
 # Java
 target
 
@@ -29,7 +32,6 @@ cloud.properties
 # Exercises folder
 exercises/*
 !exercises/exercise.sh
-!exercises/README.md
 
 /flink*
 

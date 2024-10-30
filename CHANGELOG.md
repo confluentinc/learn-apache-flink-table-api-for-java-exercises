@@ -19,3 +19,8 @@
 ## Version 0.3.2
 
 * Added a basic Gitpod configuration file.
+
+## Version 0.3.3
+
+* Added a dev container file.
+* Updated the Gitpod configuration.
