@@ -86,7 +86,7 @@ class OrderServiceIntegrationTest extends FlinkIntegrationTest {
         env.fromValues(orders).insertInto(ordersTableName).execute();
 
         // Execute the query.
-        TableResult results = retry(() -> orderService.ordersOver50Dollars());
+        TableResult results = orderService.ordersOver50Dollars();
 
         // Build the expected results.
         List<Row> expected = orders.stream().filter(row -> row.<Double>getFieldAs(indexOf("price")) >= 50).toList();
@@ -128,7 +128,7 @@ class OrderServiceIntegrationTest extends FlinkIntegrationTest {
         env.fromValues(orders).insertInto(ordersTableName).execute();
 
         // Execute the query.
-        TableResult results = retry(() -> orderService.pricesWithTax(taxAmount));
+        TableResult results = orderService.pricesWithTax(taxAmount);
 
         // Fetch the actual results.
         List<Row> actual = fetchRows(results)
@@ -162,6 +162,7 @@ class OrderServiceIntegrationTest extends FlinkIntegrationTest {
     @Test
     @Timeout(60)
     public void createFreeShippingTable_shouldCreateTheTable() {
+        deleteTable(orderQualifiedForFreeShippingTableName);
         deleteTableOnExit(orderQualifiedForFreeShippingTableName);
 
         TableResult result = orderService.createFreeShippingTable();
@@ -221,11 +222,9 @@ class OrderServiceIntegrationTest extends FlinkIntegrationTest {
         cancelOnExit(orderService.streamOrdersOver50Dollars());
 
         // Query the destination table.
-        TableResult queryResult = retry(() ->
-            env.from(orderQualifiedForFreeShippingTableName)
-                .select($("*"))
-                .execute()
-        );
+        TableResult queryResult = env.from(orderQualifiedForFreeShippingTableName)
+            .select($("*"))
+            .execute();
 
         // Obtain the actual results.
         List<Row> actual = fetchRows(queryResult)

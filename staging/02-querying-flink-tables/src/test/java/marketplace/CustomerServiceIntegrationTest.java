@@ -56,7 +56,7 @@ class CustomerServiceIntegrationTest extends FlinkIntegrationTest {
         env.fromValues(customers).insertInto(customersTableName).execute();
 
         // Execute the query.
-        TableResult results = retry(() -> customerService.allCustomers());
+        TableResult results = customerService.allCustomers();
 
         // Fetch the actual results.
         List<Row> actual = fetchRows(results)
@@ -90,7 +90,7 @@ class CustomerServiceIntegrationTest extends FlinkIntegrationTest {
         env.fromValues(customers).insertInto(customersTableName).execute();
 
         // Execute the query.
-        TableResult results = retry(() -> customerService.allCustomerAddresses());
+        TableResult results = customerService.allCustomerAddresses();
 
         // Fetch the actual results.
         List<Row> actual = fetchRows(results)

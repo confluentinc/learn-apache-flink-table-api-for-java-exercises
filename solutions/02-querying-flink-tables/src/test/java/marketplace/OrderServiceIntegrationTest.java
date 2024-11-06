@@ -72,7 +72,7 @@ class OrderServiceIntegrationTest extends FlinkIntegrationTest {
         env.fromValues(orders).insertInto(ordersTableName).execute();
 
         // Execute the query.
-        TableResult results = retry(() -> orderService.ordersOver50Dollars());
+        TableResult results = orderService.ordersOver50Dollars();
 
         // Build the expected results.
         List<Row> expected = orders.stream().filter(row -> row.<Double>getFieldAs(indexOf("price")) >= 50).toList();
@@ -114,7 +114,7 @@ class OrderServiceIntegrationTest extends FlinkIntegrationTest {
         env.fromValues(orders).insertInto(ordersTableName).execute();
 
         // Execute the query.
-        TableResult results = retry(() -> orderService.pricesWithTax(taxAmount));
+        TableResult results = orderService.pricesWithTax(taxAmount);
 
         // Fetch the actual results.
         List<Row> actual = fetchRows(results)

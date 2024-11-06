@@ -76,6 +76,7 @@ class ClickServiceIntegrationTest extends FlinkIntegrationTest {
     @Test
     @Timeout(60)
     public void createOrderPlacedAfterClickTable_shouldCreateTheTable() {
+        deleteTable(orderPlacedAfterClickTableName);
         deleteTableOnExit(orderPlacedAfterClickTableName);
 
         TableResult result = clickService.createOrderPlacedAfterClickTable();
@@ -200,11 +201,9 @@ class ClickServiceIntegrationTest extends FlinkIntegrationTest {
         cancelOnExit(clickService.streamOrderPlacedAfterClick(withinTimePeriod));
 
         // Query the destination table.
-        TableResult queryResult = retry(() ->
-            env.from(orderPlacedAfterClickTableName)
-                .select($("*"))
-                .execute()
-        );
+        TableResult queryResult = env.from(orderPlacedAfterClickTableName)
+            .select($("*"))
+            .execute();
 
         Set<Row> actual = new HashSet<>(
             fetchRows(queryResult)

@@ -42,8 +42,6 @@ public class ClickService {
     }
 
     public TableResult streamOrderPlacedAfterClick(Duration withinTimePeriod) {
-        createOrderPlacedAfterClickTable();
-
         Table clicks = env
             .from(clicksTableName)
             .select(

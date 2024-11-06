@@ -24,3 +24,9 @@
 
 * Added a dev container file.
 * Updated the Gitpod configuration.
+
+## Version 0.3.4
+
+* Recent updates in Confluent Cloud have improved the reliability of queries. 
+This negates the need for the retries that were previously used.
+The retry logic has been removed as a consequence.
