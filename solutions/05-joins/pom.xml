@@ -198,7 +198,6 @@ under the License.
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <rerunFailingTestsCount>5</rerunFailingTestsCount>
                     <argLine>-XX:+EnableDynamicAgentLoading</argLine>
                 </configuration>
             </plugin>

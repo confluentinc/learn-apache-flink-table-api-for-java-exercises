@@ -93,26 +93,6 @@ public abstract class FlinkIntegrationTest {
         }
     }
 
-    protected TableResult retry(Supplier<TableResult> supplier) {
-        return retry(3, supplier);
-    }
-
-    protected TableResult retry(int tries, Supplier<TableResult> supplier) {
-        try {
-            return supplier.get();
-        } catch (Exception e) {
-            logger.error("Failed on retryable command.", e);
-
-            if(tries > 0) {
-                logger.info("Retrying");
-                return retry(tries - 1, supplier);
-            } else {
-                logger.info("Maximum number of tries exceeded. Failing...");
-                throw e;
-            }
-        }
-    }
-
     protected TableResult cancelOnExit(TableResult tableResult) {
         jobsToCancel.add(tableResult);
         return tableResult;
