@@ -14,7 +14,8 @@
      "ghcr.io/devcontainers/features/java:1": {
         "version": "none",
         "installMaven": "true"
-    }
+    },
+    "ghcr.io/devcontainers/features/python:1": {}
   },
 
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
@@ -37,5 +38,5 @@
     }
   ],
 
-  "onCreateCommand": "sudo curl -L --http1.1 https://cnfl.io/cli | sudo sh -s -- -b /usr/local/bin"
+  "onCreateCommand": "sudo curl -L --http1.1 https://cnfl.io/cli | sudo sh -s -- -b /usr/local/bin && confluent plugin install confluent-flink-quickstart"
 }

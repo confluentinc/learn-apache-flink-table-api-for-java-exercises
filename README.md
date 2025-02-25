@@ -1,6 +1,6 @@
 # Apache Flink Table API for Java
 
-This repository is for the [** Apache Flink® Table API: Processing Data Streams in Java**](https://developer.confluent.io/courses/flink-table-api-java/) course provided by Confluent Developer.
+This repository is for the [Apache Flink® Table API: Processing Data Streams in Java](https://developer.confluent.io/courses/flink-table-api-java/) course provided by Confluent Developer.
 
 ## A Simple Marketplace with Apache Flink
 
