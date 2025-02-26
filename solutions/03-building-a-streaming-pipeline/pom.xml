@@ -30,9 +30,7 @@ under the License.
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <flink.version>1.20.0</flink.version>
-        <confluent-plugin.version>1.20-42</confluent-plugin.version>
-        <kafka-clients.version>3.8.0</kafka-clients.version>
-        <schema-registry-client.version>7.7.0</schema-registry-client.version>
+        <confluent-plugin.version>1.20-50</confluent-plugin.version>
         <target.java.version>21</target.java.version>
         <maven.compiler.source>${target.java.version}</maven.compiler.source>
         <maven.compiler.target>${target.java.version}</maven.compiler.target>
@@ -71,20 +69,6 @@ under the License.
             <groupId>io.confluent.flink</groupId>
             <artifactId>confluent-flink-table-api-java-plugin</artifactId>
             <version>${confluent-plugin.version}</version>
-        </dependency>
-
-        <!-- Apache Kafka dependencies -->
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
-            <version>${kafka-clients.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.confluent</groupId>
-            <artifactId>kafka-schema-registry-client</artifactId>
-            <version>${schema-registry-client.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- Add logging framework, to produce console output when running in the IDE. -->

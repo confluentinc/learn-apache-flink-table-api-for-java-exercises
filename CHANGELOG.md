@@ -30,3 +30,8 @@
 * Recent updates in Confluent Cloud have improved the reliability of queries. 
 This negates the need for the retries that were previously used.
 The retry logic has been removed as a consequence.
+
+## Version 0.4.0
+
+* Upgrade Confluent Plugin to version 1.20-50
+* The new version of the Confluent plugin now supports `DROP TABLE`. This allows us to use it to delete temporary tables during tests, instead of needing the Kafka admin client and the Schema Registry client. This is a much simpler flow and will also simplify the exercise instructions.
