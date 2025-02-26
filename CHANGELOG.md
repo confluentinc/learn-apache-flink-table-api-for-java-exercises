@@ -35,3 +35,7 @@ The retry logic has been removed as a consequence.
 
 * Upgrade Confluent Plugin to version 1.20-50
 * The new version of the Confluent plugin now supports `DROP TABLE`. This allows us to use it to delete temporary tables during tests, instead of needing the Kafka admin client and the Schema Registry client. This is a much simpler flow and will also simplify the exercise instructions.
+
+## Version 0.4.1
+
+* Await the results of the `DROP TABLE` command to eliminate potential race conditions.
