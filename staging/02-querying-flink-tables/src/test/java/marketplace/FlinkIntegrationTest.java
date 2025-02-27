@@ -83,7 +83,12 @@ public abstract class FlinkIntegrationTest {
 
         if(Arrays.asList(env.listTables(catalog, database)).contains(table)) {
             logger.info("Deleting table {}", tableName);
-            env.executeSql(String.format("DROP TABLE %s", tableName));
+
+            try {
+                env.executeSql(String.format("DROP TABLE %s", tableName)).await();
+            } catch (Exception e) {
+                logger.error("Unable to delete temporary table: " + tableName, e);
+            }
         }
     }
 
