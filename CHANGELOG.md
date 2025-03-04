@@ -39,3 +39,8 @@ The retry logic has been removed as a consequence.
 ## Version 0.4.1
 
 * Await the results of the `DROP TABLE` command to eliminate potential race conditions.
+
+## Version 0.4.2
+
+* Update the Dev Container to allow it to work with the Flink Quickstart Plugin for the Confluent CLI.
+* Small tweak to the readme related to formatting.
