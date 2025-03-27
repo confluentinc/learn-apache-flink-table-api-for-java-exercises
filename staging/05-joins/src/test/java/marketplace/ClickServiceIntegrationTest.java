@@ -1,5 +1,8 @@
 package marketplace;
 
+import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.api.Schema;
+import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.TableResult;
 import org.apache.flink.types.Row;
 import org.junit.jupiter.api.Tag;
@@ -20,36 +23,41 @@ class ClickServiceIntegrationTest extends FlinkIntegrationTest {
     private final String clicksTableName = "`flink-table-api-java`.`marketplace`.`clicks-temp`";
     private final String ordersTableName = "`flink-table-api-java`.`marketplace`.`orders-temp`";
     private final String orderPlacedAfterClickTableName = "`flink-table-api-java`.`marketplace`.`order-placed-after-click-temp`";
-    private final String orderPlacedAfterClickShortTableName = "order-placed-after-click-temp";
 
-    private final String clicksTableDefinition =
-        "CREATE TABLE IF NOT EXISTS " + clicksTableName + " (\n" +
-            "  `click_id` VARCHAR(2147483647) NOT NULL,\n" +
-            "  `user_id` INT NOT NULL,\n" +
-            "  `url` VARCHAR(2147483647) NOT NULL,\n" +
-            "  `user_agent` VARCHAR(2147483647) NOT NULL,\n" +
-            "  `view_time` INT NOT NULL,\n" +
-            "  `event_time` TIMESTAMP_LTZ(3) METADATA FROM 'timestamp',\n" +
-            "  `$rowtime` TIMESTAMP_LTZ(3) NOT NULL METADATA VIRTUAL COMMENT 'SYSTEM',\n" +
-            "  WATERMARK FOR `$rowtime` AS `$rowtime`\n" +
-            ") DISTRIBUTED INTO 1 BUCKETS WITH (\n" +
-            "   'kafka.retention.time' = '1 h',\n" +
-            "   'scan.startup.mode' = 'earliest-offset'\n" +
-            ");";
+    private final Schema clicksTableSchema = Schema.newBuilder()
+            .column("click_id", DataTypes.STRING().notNull())
+            .column("user_id", DataTypes.INT().notNull())
+            .column("url", DataTypes.STRING().notNull())
+            .column("user_agent", DataTypes.STRING().notNull())
+            .column("view_time", DataTypes.INT().notNull())
+            .columnByMetadata("event_time", DataTypes.TIMESTAMP_LTZ(3), "timestamp")
+            .columnByMetadata("$rowtime", DataTypes.TIMESTAMP_LTZ(3).notNull(), true).withComment("SYSTEM")
+            .watermark("$rowtime", "$rowtime")
+            .build();
 
-    private final String ordersTableDefinition =
-        "CREATE TABLE IF NOT EXISTS " + ordersTableName + " (\n" +
-            "  `order_id` VARCHAR(2147483647) NOT NULL,\n" +
-            "  `customer_id` INT NOT NULL,\n" +
-            "  `product_id` VARCHAR(2147483647) NOT NULL,\n" +
-            "  `price` DOUBLE NOT NULL,\n" +
-            "  `event_time` TIMESTAMP_LTZ(3) METADATA FROM 'timestamp',\n" +
-            "  `$rowtime` TIMESTAMP_LTZ(3) NOT NULL METADATA VIRTUAL COMMENT 'SYSTEM',\n" +
-            "  WATERMARK FOR `$rowtime` AS `$rowtime`\n" +
-            ") DISTRIBUTED INTO 1 BUCKETS WITH (\n" +
-            "   'kafka.retention.time' = '1 h',\n" +
-            "   'scan.startup.mode' = 'earliest-offset'\n" +
-            ");";
+    private final TableDescriptor clicksTableDescriptor = TableDescriptor.forConnector("confluent")
+            .schema(clicksTableSchema)
+            .option("kafka.retention.time", "1h")
+            .option("scan.startup.mode", "earliest-offset")
+            .distributedBy(1, "click_id")
+            .build();
+
+    private final Schema ordersTableSchema = Schema.newBuilder()
+            .column("order_id", DataTypes.STRING().notNull())
+            .column("customer_id", DataTypes.INT().notNull())
+            .column("product_id", DataTypes.STRING().notNull())
+            .column("price", DataTypes.DOUBLE().notNull())
+            .columnByMetadata("event_time", DataTypes.TIMESTAMP_LTZ(3), "timestamp")
+            .columnByMetadata("$rowtime", DataTypes.TIMESTAMP_LTZ(3).notNull(), true).withComment("SYSTEM")
+            .watermark("$rowtime", "$rowtime")
+            .build();
+
+    private final TableDescriptor orderTableDescriptor = TableDescriptor.forConnector("confluent")
+            .schema(ordersTableSchema)
+            .option("kafka.retention.time", "1h")
+            .option("scan.startup.mode", "earliest-offset")
+            .distributedBy(1, "order_id")
+            .build();
 
     private final List<String> orderTableFields = Arrays.asList("order_id", "customer_id", "product_id", "price", "event_time");
     private Integer indexOfOrderField(String fieldName) {
@@ -66,7 +74,7 @@ class ClickServiceIntegrationTest extends FlinkIntegrationTest {
     public void setup() {
         super.setup();
         clickService = new ClickService(
-            env,
+            testKit.tableEnvironment,
             clicksTableName,
             ordersTableName,
             orderPlacedAfterClickTableName
@@ -75,25 +83,16 @@ class ClickServiceIntegrationTest extends FlinkIntegrationTest {
 
     @Test
     @Timeout(60)
-    public void createOrderPlacedAfterClickTable_shouldCreateTheTable() {
-        deleteTable(orderPlacedAfterClickTableName);
-        deleteTableOnExit(orderPlacedAfterClickTableName);
-
-        TableResult result = clickService.createOrderPlacedAfterClickTable();
+    public void createOrderPlacedAfterClickTable_shouldCreateTheTable() throws Exception {
+        TableResult result = testKit.registerTemporaryTable(orderPlacedAfterClickTableName, clickService::createOrderPlacedAfterClickTable);
 
         String status = result.collect().next().getFieldAs(0);
         assertEquals("Command completed successfully.", status);
 
-        env.useCatalog("flink-table-api-java");
-        env.useDatabase("marketplace");
-        String[] tables = env.listTables();
-        assertTrue(
-            Arrays.asList(tables).contains(orderPlacedAfterClickShortTableName),
-            "Could not find the table: "+orderPlacedAfterClickShortTableName
-        );
+        assertTrue(testKit.tableExists(orderPlacedAfterClickTableName), "Could not find the table: "+orderPlacedAfterClickTableName);
 
-        String tableDefinition = env.executeSql(
-            "SHOW CREATE TABLE `"+orderPlacedAfterClickShortTableName+"`"
+        String tableDefinition = testKit.tableEnvironment.executeSql(
+            "SHOW CREATE TABLE "+orderPlacedAfterClickTableName
         ).collect().next().getFieldAs(0);
 
         assertTrue(
@@ -109,16 +108,11 @@ class ClickServiceIntegrationTest extends FlinkIntegrationTest {
     @Test
     @Timeout(180)
     public void streamOrderPlacedAfterClick_shouldJoinOrdersAndClicksAndEmitANewStream() throws Exception {
-        // Clean up any tables left over from previously executing this test.
-        deleteTable(clicksTableName);
-        deleteTable(ordersTableName);
-        deleteTable(orderPlacedAfterClickTableName);
-
         // Create the necessary tables.
-        createTemporaryTable(clicksTableName, clicksTableDefinition);
-        createTemporaryTable(ordersTableName, ordersTableDefinition);
-        clickService.createOrderPlacedAfterClickTable().await();
-        deleteTableOnExit(orderPlacedAfterClickTableName);
+        testKit.createTemporaryTable(clicksTableName, clicksTableDescriptor);
+        testKit.createTemporaryTable(ordersTableName, orderTableDescriptor);
+
+        testKit.registerTemporaryTable(orderPlacedAfterClickTableName, clickService::createOrderPlacedAfterClickTable);
 
         // Define some constants.
         final Duration withinTimePeriod = Duration.ofMinutes(5);
@@ -190,23 +184,23 @@ class ClickServiceIntegrationTest extends FlinkIntegrationTest {
             .build();
 
         // Push data into the destination tables.
-        env.fromValues(onTimeClicks).insertInto(clicksTableName).execute();
-        env.fromValues(onTimeOrders).insertInto(ordersTableName).execute();
+        testKit.insertInto(clicksTableName, onTimeClicks).await();
+        testKit.insertInto(ordersTableName, onTimeOrders).await();
 
         // We push the late data separately, to ensure it actually comes after the earlier data.
-        env.fromValues(lateClick).insertInto(clicksTableName).execute();
-        env.fromValues(lateOrder).insertInto(ordersTableName).execute();
+        testKit.insertInto(clicksTableName, Collections.singletonList(lateClick)).await();
+        testKit.insertInto(ordersTableName, Collections.singletonList(lateOrder)).await();
 
         // Execute the query we are testing.
-        cancelOnExit(clickService.streamOrderPlacedAfterClick(withinTimePeriod));
+        testKit.registerTemporaryStatement(clickService.streamOrderPlacedAfterClick(withinTimePeriod));
 
         // Query the destination table.
-        TableResult queryResult = env.from(orderPlacedAfterClickTableName)
+        TableResult queryResult = testKit.tableEnvironment.from(orderPlacedAfterClickTableName)
             .select($("*"))
             .execute();
 
         Set<Row> actual = new HashSet<>(
-            fetchRows(queryResult)
+            testKit.streamResult(queryResult)
                 .limit(customerIds.size())
                 .toList()
         );
