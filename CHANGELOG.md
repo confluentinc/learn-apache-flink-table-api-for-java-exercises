@@ -44,3 +44,7 @@ The retry logic has been removed as a consequence.
 
 * Update the Dev Container to allow it to work with the Flink Quickstart Plugin for the Confluent CLI.
 * Small tweak to the readme related to formatting.
+
+## Version 0.4.3
+
+* Refactored the test framework.
