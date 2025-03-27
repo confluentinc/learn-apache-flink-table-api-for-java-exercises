@@ -1,5 +1,8 @@
 package marketplace;
 
+import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.api.Schema;
+import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.TableResult;
 import org.apache.flink.types.Row;
 import org.junit.jupiter.api.Tag;
@@ -14,30 +17,33 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.apache.flink.table.api.Expressions.$;
+import static org.apache.flink.table.api.Expressions.lit;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("IntegrationTest")
 class OrderServiceIntegrationTest extends FlinkIntegrationTest {
     private final String ordersTableName = "`flink-table-api-java`.`marketplace`.`orders-temp`";
     private final String orderQualifiedForFreeShippingTableName = "`flink-table-api-java`.`marketplace`.`order-qualified-for-free-shipping-temp`";
-    private final String orderQualifiedForFreeShippingShortTableName = "order-qualified-for-free-shipping-temp";
+    private final String customerOrdersForPeriodTableName = "`flink-table-api-java`.`marketplace`.`customer-orders-collected-for-period-temp`";
 
-    private final String ordersTableDefinition =
-        "CREATE TABLE IF NOT EXISTS " + ordersTableName + " (\n" +
-            "  `order_id` VARCHAR(2147483647) NOT NULL,\n" +
-            "  `customer_id` INT NOT NULL,\n" +
-            "  `product_id` VARCHAR(2147483647) NOT NULL,\n" +
-            "  `price` DOUBLE NOT NULL,\n" +
-            "  `event_time` TIMESTAMP_LTZ(3) METADATA FROM 'timestamp',\n" +
-            "  `$rowtime` TIMESTAMP_LTZ(3) NOT NULL METADATA VIRTUAL COMMENT 'SYSTEM',\n" +
-            "  WATERMARK FOR `$rowtime` AS `$rowtime`\n" +
-            ") DISTRIBUTED INTO 1 BUCKETS WITH (\n" +
-            "   'kafka.retention.time' = '1 h',\n" +
-            "   'scan.startup.mode' = 'earliest-offset'\n" +
-            ");";
+    private final Schema ordersTableSchema = Schema.newBuilder()
+            .column("order_id", DataTypes.STRING().notNull())
+            .column("customer_id", DataTypes.INT().notNull())
+            .column("product_id", DataTypes.STRING().notNull())
+            .column("price", DataTypes.DOUBLE().notNull())
+            .column("event_time", DataTypes.TIMESTAMP_LTZ(3).notNull())
+            .columnByMetadata("$rowtime", DataTypes.TIMESTAMP_LTZ(3).notNull(), true).withComment("SYSTEM")
+            .watermark("$rowtime", "$rowtime")
+            .build();
+
+    private final TableDescriptor orderTableDescriptor = TableDescriptor.forConnector("confluent")
+            .schema(ordersTableSchema)
+            .option("kafka.retention.time", "1h")
+            .option("scan.startup.mode", "earliest-offset")
+            .distributedBy(1, "order_id")
+            .build();
 
     private final List<String> orderTableFields = Arrays.asList("order_id", "customer_id", "product_id", "price");
     private Integer indexOf(String fieldName) {
@@ -60,7 +66,7 @@ class OrderServiceIntegrationTest extends FlinkIntegrationTest {
     @Override
     public void setup() {
         orderService = new OrderService(
-            env,
+            testKit.tableEnvironment,
             ordersTableName,
             orderQualifiedForFreeShippingTableName
         );
@@ -69,11 +75,8 @@ class OrderServiceIntegrationTest extends FlinkIntegrationTest {
     @Test
     @Timeout(90)
     public void ordersOver50Dollars_shouldOnlyReturnOrdersWithAPriceOf50DollarsOrMore() {
-        // Clean up any tables left over from previously executing this test.
-        deleteTable(ordersTableName);
-
         // Create a temporary orders table.
-        createTemporaryTable(ordersTableName, ordersTableDefinition);
+        testKit.createTemporaryTable(ordersTableName, orderTableDescriptor);
 
         // Create a set of orders with fixed prices
         Double[] prices = new Double[] { 25d, 49d, 50d, 51d, 75d };
@@ -83,7 +86,7 @@ class OrderServiceIntegrationTest extends FlinkIntegrationTest {
         ).toList();
 
         // Push the orders into the temporary table.
-        env.fromValues(orders).insertInto(ordersTableName).execute();
+        testKit.insertInto(ordersTableName, orders);
 
         // Execute the query.
         TableResult results = orderService.ordersOver50Dollars();
@@ -92,7 +95,7 @@ class OrderServiceIntegrationTest extends FlinkIntegrationTest {
         List<Row> expected = orders.stream().filter(row -> row.<Double>getFieldAs(indexOf("price")) >= 50).toList();
 
         // Fetch the actual results.
-        List<Row> actual = fetchRows(results)
+        List<Row> actual = testKit.streamResult(results)
             .limit(expected.size())
             .toList();
 
@@ -108,11 +111,8 @@ class OrderServiceIntegrationTest extends FlinkIntegrationTest {
     @Test
     @Timeout(90)
     public void pricesWithTax_shouldReturnTheCorrectPrices() {
-        // Clean up any tables left over from previously executing this test.
-        deleteTable(ordersTableName);
-
         // Create a temporary orders table.
-        createTemporaryTable(ordersTableName, ordersTableDefinition);
+        testKit.createTemporaryTable(ordersTableName, orderTableDescriptor);
 
         BigDecimal taxAmount = BigDecimal.valueOf(1.15);
 
@@ -125,13 +125,13 @@ class OrderServiceIntegrationTest extends FlinkIntegrationTest {
         ).toList();
 
         // Push the orders into the temporary table.
-        env.fromValues(orders).insertInto(ordersTableName).execute();
+        testKit.insertInto(ordersTableName, orders);
 
         // Execute the query.
         TableResult results = orderService.pricesWithTax(taxAmount);
 
         // Fetch the actual results.
-        List<Row> actual = fetchRows(results)
+        List<Row> actual = testKit.streamResult(results)
             .limit(orders.size())
             .toList();
 
@@ -161,25 +161,19 @@ class OrderServiceIntegrationTest extends FlinkIntegrationTest {
 
     @Test
     @Timeout(60)
-    public void createFreeShippingTable_shouldCreateTheTable() {
-        deleteTable(orderQualifiedForFreeShippingTableName);
-        deleteTableOnExit(orderQualifiedForFreeShippingTableName);
-
-        TableResult result = orderService.createFreeShippingTable();
+    public void createFreeShippingTable_shouldCreateTheTable() throws Exception {
+        TableResult result = testKit.registerTemporaryTable(orderQualifiedForFreeShippingTableName, orderService::createFreeShippingTable);
 
         String status = result.collect().next().getFieldAs(0);
         assertEquals("Command completed successfully.", status);
 
-        env.useCatalog("flink-table-api-java");
-        env.useDatabase("marketplace");
-        String[] tables = env.listTables();
         assertTrue(
-            Arrays.asList(tables).contains(orderQualifiedForFreeShippingShortTableName),
-            "Could not find the table: "+orderQualifiedForFreeShippingShortTableName
+            testKit.tableExists(orderQualifiedForFreeShippingTableName),
+            "Could not find the table: "+orderQualifiedForFreeShippingTableName
         );
 
-        String tableDefinition = env.executeSql(
-            "SHOW CREATE TABLE `"+orderQualifiedForFreeShippingShortTableName+"`"
+        String tableDefinition = testKit.tableEnvironment.executeSql(
+            "SHOW CREATE TABLE "+orderQualifiedForFreeShippingTableName
         ).collect().next().getFieldAs(0);
 
         assertTrue(
@@ -195,16 +189,11 @@ class OrderServiceIntegrationTest extends FlinkIntegrationTest {
     @Test
     @Timeout(180)
     public void streamOrdersOver50Dollars_shouldStreamRecordsToTheTable() throws Exception {
-        // Clean up any tables left over from previously executing this test.
-        deleteTable(ordersTableName);
-        deleteTable(orderQualifiedForFreeShippingTableName);
-
         // Create a temporary orders table.
-        createTemporaryTable(ordersTableName, ordersTableDefinition);
+        testKit.createTemporaryTable(ordersTableName, orderTableDescriptor);
 
         // Create the destination table.
-        orderService.createFreeShippingTable().await();
-        deleteTableOnExit(orderQualifiedForFreeShippingTableName);
+        testKit.registerTemporaryTable(orderQualifiedForFreeShippingTableName,  orderService::createFreeShippingTable);
 
         final int detailsPosition = 1;
 
@@ -216,18 +205,18 @@ class OrderServiceIntegrationTest extends FlinkIntegrationTest {
         ).toList();
 
         // Push the orders into the temporary table.
-        env.fromValues(orders).insertInto(ordersTableName).execute();
+        testKit.insertInto(ordersTableName, orders);
 
         // Initiate the stream.
-        cancelOnExit(orderService.streamOrdersOver50Dollars());
+        testKit.registerTemporaryStatement(orderService.streamOrdersOver50Dollars());
 
         // Query the destination table.
-        TableResult queryResult = env.from(orderQualifiedForFreeShippingTableName)
+        TableResult queryResult = testKit.tableEnvironment.from(orderQualifiedForFreeShippingTableName)
             .select($("*"))
             .execute();
 
         // Obtain the actual results.
-        List<Row> actual = fetchRows(queryResult)
+        List<Row> actual = testKit.streamResult(queryResult)
             .limit(Arrays.stream(prices).filter(p -> p >= 50).count())
             .toList();
 

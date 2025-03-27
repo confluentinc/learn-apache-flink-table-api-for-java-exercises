@@ -1,10 +1,8 @@
 package marketplace;
 
-import org.apache.flink.table.api.TableResult;
+import org.apache.flink.table.api.*;
 import org.apache.flink.types.Row;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.*;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -15,25 +13,28 @@ import static org.junit.jupiter.api.Assertions.*;
 class CustomerServiceIntegrationTest extends FlinkIntegrationTest {
     private final String customersTableName = "`flink-table-api-java`.`marketplace`.`customers-temp`";
 
-    private final String customersTableDefinition =
-        "CREATE TABLE " + customersTableName + " (\n" +
-            "  `customer_id` INT NOT NULL,\n" +
-            "  `name` VARCHAR(2147483647) NOT NULL,\n" +
-            "  `address` VARCHAR(2147483647) NOT NULL,\n" +
-            "  `postcode` VARCHAR(2147483647) NOT NULL,\n" +
-            "  `city` VARCHAR(2147483647) NOT NULL,\n" +
-            "  `email` VARCHAR(2147483647) NOT NULL\n" +
-            ") DISTRIBUTED INTO 1 BUCKETS WITH (\n" +
-            "   'kafka.retention.time' = '1 h',\n" +
-            "   'scan.startup.mode' = 'earliest-offset'\n" +
-            ");";
+    private final Schema customerTableSchema = Schema.newBuilder()
+            .column("customer_id", DataTypes.INT().notNull())
+            .column("name", DataTypes.STRING().notNull())
+            .column("address", DataTypes.STRING().notNull())
+            .column("postcode", DataTypes.STRING().notNull())
+            .column("city", DataTypes.STRING().notNull())
+            .column("email", DataTypes.STRING().notNull())
+            .build();
+
+    private final TableDescriptor customerTableDescriptor = TableDescriptor.forConnector("confluent")
+            .schema(customerTableSchema)
+            .option("kafka.retention.time", "1h")
+            .option("scan.startup.mode", "earliest-offset")
+            .distributedBy(1, "customer_id")
+            .build();
 
     private CustomerService customerService;
 
     @Override
     public void setup() {
         customerService = new CustomerService(
-            env,
+            testKit.tableEnvironment,
             customersTableName
         );
     }
@@ -41,11 +42,9 @@ class CustomerServiceIntegrationTest extends FlinkIntegrationTest {
     @Test
     @Timeout(90)
     public void allCustomers_shouldReturnTheDetailsOfAllCustomers() throws Exception {
-        // Clean up any tables left over from previously executing this test.
-        deleteTable(customersTableName);
 
         // Create a temporary customers table.
-        createTemporaryTable(customersTableName, customersTableDefinition);
+        testKit.createTemporaryTable(customersTableName, customerTableDescriptor);
 
         // Generate some customers.
         List<Row> customers = Stream.generate(() -> new CustomerBuilder().build())
@@ -53,13 +52,13 @@ class CustomerServiceIntegrationTest extends FlinkIntegrationTest {
             .toList();
 
         // Push the customers into the temporary table.
-        env.fromValues(customers).insertInto(customersTableName).execute();
+        testKit.insertInto(customersTableName, customers);
 
         // Execute the query.
         TableResult results = customerService.allCustomers();
 
         // Fetch the actual results.
-        List<Row> actual = fetchRows(results)
+        List<Row> actual = testKit.streamResult(results)
             .limit(customers.size())
             .toList();
 
@@ -75,11 +74,8 @@ class CustomerServiceIntegrationTest extends FlinkIntegrationTest {
     @Test
     @Timeout(90)
     public void allCustomerAddresses_shouldReturnTheAddressesOfAllCustomers() throws Exception {
-        // Clean up any tables left over from previously executing this test.
-        deleteTable(customersTableName);
-
         // Create a temporary customers table.
-        createTemporaryTable(customersTableName, customersTableDefinition);
+        testKit.createTemporaryTable(customersTableName, customerTableDescriptor);
 
         // Generate some customers.
         List<Row> customers = Stream.generate(() -> new CustomerBuilder().build())
@@ -87,13 +83,13 @@ class CustomerServiceIntegrationTest extends FlinkIntegrationTest {
             .toList();
 
         // Push the customers into the temporary table.
-        env.fromValues(customers).insertInto(customersTableName).execute();
+        testKit.insertInto(customersTableName, customers);
 
         // Execute the query.
         TableResult results = customerService.allCustomerAddresses();
 
         // Fetch the actual results.
-        List<Row> actual = fetchRows(results)
+        List<Row> actual = testKit.streamResult(results)
             .limit(customers.size())
             .toList();
 
