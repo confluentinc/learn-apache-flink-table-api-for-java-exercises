@@ -34,8 +34,8 @@ under the License.
         <target.java.version>21</target.java.version>
         <maven.compiler.source>${target.java.version}</maven.compiler.source>
         <maven.compiler.target>${target.java.version}</maven.compiler.target>
-        <log4j.version>2.17.1</log4j.version>
-        <junit.version>5.11.0</junit.version>
+        <log4j.version>2.26.1</log4j.version>
+        <junit.version>5.14.4</junit.version>
     </properties>
 
     <repositories>
@@ -105,7 +105,7 @@ under the License.
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.12.0</version>
+            <version>5.23.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -118,7 +118,7 @@ under the License.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.16.0</version>
                 <configuration>
                     <source>${target.java.version}</source>
                     <target>${target.java.version}</target>
@@ -130,7 +130,7 @@ under the License.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.6.2</version>
                 <executions>
                     <!-- Run shade goal on package phase -->
                     <execution>
@@ -173,7 +173,7 @@ under the License.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.5.6</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.junit.jupiter</groupId>
